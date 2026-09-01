@@ -1654,7 +1654,7 @@ class PlacePolylineTool extends MultiStepAnnotationTool {
  * contributes 0 so it does not affect the measured length. Returns undefined if
  * the layer transform is not yet resolved.
  */
-function getAnnotationPhysicalScales(
+export function getAnnotationPhysicalScales(
   annotationLayer: AnnotationLayerState,
   layer: UserLayerWithAnnotations,
 ): Float64Array | undefined {
