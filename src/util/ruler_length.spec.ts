@@ -58,6 +58,30 @@ describe("computeRulerPhysicalLength", () => {
     expect(computeRulerPhysicalLength(pointsY, [10, 5])).toBeCloseTo(10, 6);
   });
 
+  // L1: a zero-scale (non-length) axis contributes nothing to the length
+  it("yields 0 for a zero-scale (non-length) axis", () => {
+    // The middle axis is a non-length axis (e.g. time), so the 100 units
+    // travelled along it must not lengthen the measurement: only 3 along x and
+    // 4 along z count, giving 5.
+    const points = [p(0, 0, 0), p(3, 100, 4)];
+    expect(computeRulerPhysicalLength(points, [1, 0, 1])).toBeCloseTo(5, 6);
+  });
+
+  // L2: pins current behaviour for a `scaleNm` shorter than the point rank.
+  // Dimensions past its end fall back to 1 nm/unit, so the Euclidean norm mixes
+  // nanometer-scaled and unit-scaled deltas and yields a plausible but
+  // physically meaningless number instead of failing.
+  it("falls back to a scale of 1 past the end of a short scaleNm", () => {
+    const points = [p(0, 0), p(3, 4)];
+    // With a full scaleNm this is 3 and 4 units at 10 nm/unit -> 50 nm.
+    expect(computeRulerPhysicalLength(points, [10, 10])).toBeCloseTo(50, 6);
+    // With scaleNm = [10], y falls back to 1 nm/unit: sqrt(30^2 + 4^2).
+    expect(computeRulerPhysicalLength(points, [10])).toBeCloseTo(
+      Math.sqrt(30 * 30 + 4 * 4),
+      6,
+    );
+  });
+
   // C5: never throws, returns finite non-negative
   it("returns a finite non-negative number", () => {
     const result = computeRulerPhysicalLength([p(-1, -2), p(3, 5)], [7, 9]);

@@ -96,6 +96,37 @@ describe("computeVertexPhysicalAngles", () => {
     expect(stretched[0]).toBeLessThanOrEqual(90);
   });
 
+  // L1: a zero-scale (non-length) axis contributes nothing to the angle
+  it("yields 0 for a zero-scale (non-length) axis", () => {
+    // Arms (1, 0) and (0, 1) in x/z, each with a large displacement along a
+    // zero-scale middle axis. That axis must drop out, leaving the 90 degrees of
+    // the x/z projection.
+    const angles = computeVertexPhysicalAngles(
+      [p(1, 50, 0), p(0, 0, 0), p(0, -70, 1)],
+      [1, 0, 1],
+    );
+    expect(angles[0]).toBeCloseTo(90, 5);
+  });
+
+  // L2: pins current behaviour for a `scaleNm` shorter than the point rank.
+  // Dimensions past its end fall back to 1 nm/unit, so the arms are measured in
+  // a mix of nanometers and raw units and the angle silently changes.
+  it("falls back to a scale of 1 past the end of a short scaleNm", () => {
+    const points = [p(1, 0), p(0, 0), p(1, 1)];
+    // With a full scaleNm the arms (1000, 0) and (1000, 1000) are 45 degrees.
+    expect(computeVertexPhysicalAngles(points, [1000, 1000])[0]).toBeCloseTo(
+      45,
+      5,
+    );
+    // With scaleNm = [1000], y falls back to 1 nm/unit: the arms become
+    // (1000, 0) and (1000, 1), so the angle collapses to atan(1/1000) rather
+    // than to the 0 a fallback of 0 would give.
+    expect(computeVertexPhysicalAngles(points, [1000])[0]).toBeCloseTo(
+      (Math.atan(1 / 1000) * 180) / Math.PI,
+      6,
+    );
+  });
+
   // C7: results within [0, 180], never throws
   it("keeps non-NaN results within 0..180", () => {
     const angles = computeVertexPhysicalAngles(

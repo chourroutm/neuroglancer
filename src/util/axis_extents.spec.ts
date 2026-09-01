@@ -59,6 +59,16 @@ describe("computeAxisPhysicalExtents", () => {
     expect(extents[1]).toBe(0);
   });
 
+  // L2: pins current behaviour for a `scaleNm` shorter than the point rank.
+  // Dimensions past its end fall back to 1 nm/unit, so their extents come back
+  // in raw coordinate units while the earlier ones are in nanometers.
+  it("falls back to a scale of 1 past the end of a short scaleNm", () => {
+    const extents = computeAxisPhysicalExtents(p(0, 0, 0), p(2, 3, 5), [4]);
+    expect(extents[0]).toBeCloseTo(8, 6); // 2 units at 4 nm/unit
+    expect(extents[1]).toBeCloseTo(3, 6); // no entry -> 1 nm/unit
+    expect(extents[2]).toBeCloseTo(5, 6); // no entry -> 1 nm/unit
+  });
+
   // C3: finite, non-negative
   it("returns finite, non-negative extents", () => {
     const extents = computeAxisPhysicalExtents(p(-3, 2), p(5, -1), [7, 9]);
