@@ -40,7 +40,7 @@ import type { UserLayerWithAnnotations } from "#src/ui/annotations.js";
 import { getAnnotationPhysicalScales } from "#src/ui/annotations.js";
 import * as matrix from "#src/util/matrix.js";
 
-/** Builds a real coordinate space from parallel name/unit/scale lists. */
+/** Builds a coordinate space from parallel name/unit/scale lists. */
 const space = (
   names: readonly string[],
   units: readonly string[],
@@ -80,11 +80,12 @@ const renderLayerTransform = (options: {
 /**
  * `getAnnotationPhysicalScales` reads exactly three watchable values: the
  * annotation layer's transform, the root (global) coordinate space, and the
- * layer's local coordinate space. A real `AnnotationLayerState` additionally
- * needs an `AnnotationDisplayState` and a `LayerDataSource`, and a real
+ * layer's local coordinate space. A full `AnnotationLayerState` additionally
+ * needs an `AnnotationDisplayState` and a `LayerDataSource`, and a full
  * `UserLayerWithAnnotations` needs a `TopLevelLayerListSpecification` (and so a
- * live display/WebGL context), so the two containers are narrow stubs holding
- * real `WatchableValue`s over real `CoordinateSpace`s.
+ * live display/WebGL context), so the two containers are narrow stubs. What they
+ * hold is not stubbed: `WatchableValue`s over `CoordinateSpace`s built with
+ * `makeCoordinateSpace`.
  */
 const annotationLayerWithTransform = (
   transform: RenderLayerTransformOrError,
@@ -236,11 +237,11 @@ describe("getAnnotationPhysicalScales", () => {
   });
 
   // G3: a render dimension outside `[0, rank)` is skipped. Both of the next two
-  // cases pin the observable contract -- no throw, correct length, in-range
-  // entries untouched -- rather than the bounds check itself: an out-of-bounds
-  // or negative index write to a Float64Array is silently ignored, so the check
-  // is defensive. They do guard against a plausible wrong fix such as clamping
-  // the index into range.
+  // cases pin the observable contract - no throw, correct length, in-range
+  // entries untouched - rather than the bounds check itself. An out-of-bounds or
+  // negative index write to a Float64Array has no effect, so deleting the check
+  // leaves these tests green; it is defensive. They do catch a plausible wrong
+  // fix such as clamping the index into range.
   it("skips a dimension mapped to render dimension -1", () => {
     const scaleNm = getAnnotationPhysicalScales(
       annotationLayerWithTransform(

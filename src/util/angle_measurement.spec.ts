@@ -110,7 +110,7 @@ describe("computeVertexPhysicalAngles", () => {
 
   // L2: pins current behaviour for a `scaleNm` shorter than the point rank.
   // Dimensions past its end fall back to 1 nm/unit, so the arms are measured in
-  // a mix of nanometers and raw units and the angle silently changes.
+  // a mix of nanometers and raw units, which changes the angle.
   it("falls back to a scale of 1 past the end of a short scaleNm", () => {
     const points = [p(1, 0), p(0, 0), p(1, 1)];
     // With a full scaleNm the arms (1000, 0) and (1000, 1000) are 45 degrees.
